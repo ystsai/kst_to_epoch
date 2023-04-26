@@ -21,31 +21,53 @@
       <div class="row mb-3">
         <div class="col-4">
           <label for="Year" class="form-label">Year</label>
-          <input type="text" class="form-control" placeholder="YYYY" aria-label="Year">
+          <input type="text" class="form-control" placeholder="YYYY" aria-label="Year" id="year">
         </div>
         <div class="col-4">
           <label for="Month" class="form-label">Month</label>
-          <input type="text" class="form-control" placeholder="MM" aria-label="Month">
+          <input type="text" class="form-control" placeholder="MM" aria-label="Month" id="month">
         </div>
         <div class="col-4">
           <label for="Day" class="form-label">Day</label>
-          <input type="text" class="form-control" placeholder="DD" aria-label="Day">
+          <input type="text" class="form-control" placeholder="DD" aria-label="Day" id="day">
         </div>
       </div>
       <div class="row mb-3">
         <div class="col-4">
           <label for="Hour" class="form-label">Hour (24 hour format)</label>
-          <input type="text" class="form-control" placeholder="HH" aria-label="Hour">
+          <input type="text" class="form-control" placeholder="HH" aria-label="Hour" id="hour">
         </div>
         <div class="col-4">
           <label for="Minute" class="form-label">Minute</label>
-          <input type="text" class="form-control" placeholder="MM" aria-label="Minute">
+          <input type="text" class="form-control" placeholder="MM" aria-label="Minute" id="minute">
         </div>
         <div class="col-4">
           <label for="Second" class="form-label">Second</label>
-          <input type="text" class="form-control" placeholder="SS" aria-label="Second">
+          <input type="text" class="form-control" placeholder="SS" aria-label="Second" id="second">
         </div>
       </div>
+      <button class="btn btn-primary" id="submit" onclick="main()">Submit KST
+      </button>
     </div>
+    <!-- text box for output -->
+    <div class="container-fluid px-4 py-4">
+      <textarea class="form-control" id="output"></textarea>
+    </div>
+    <!-- script to process KST and convert to Epoch -->
+    <script>
+      const output = document.getElementById("output");
+      const year = document.getElementById("year");
+      const month = document.getElementById("month");
+      const day = document.getElementById("day");
+      const hour = document.getElementById("hour");
+      const minute = document.getElementById("minute");
+      const second = document.getElementById("second");
+      output.value = ""
+      const kst = (year.value + '-' + month.value + '-' + day.value + 
+        ' ' + hour.value + ':' + minute.value + ':' + second.value)
+      async function main() {
+        output.value += "KST " + kst + "\n"
+      }
+    </script>  
   </body>
 </html>
