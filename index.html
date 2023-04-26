@@ -51,7 +51,7 @@
     </div>
     <!-- text box for output -->
     <div class="container-fluid px-4 py-4">
-      <textarea class="form-control" id="output"></textarea>
+      <textarea class="form-control" id="output" style="height: 200px"></textarea>
     </div>
     <!-- script to process KST and convert to Epoch -->
     <script>
@@ -65,6 +65,7 @@
       output.value = "Loading...\n"
       async function main() {
         let pyodide = await loadPyodide();
+        await pyodide.loadPackage("pytz");
         output.value += "Ready to calculate!\n"
         return pyodide;
       }
@@ -73,24 +74,46 @@
 
       async function calcEpoch() {
         let pyodide = await pyodideReady;
-        output.value += "KST: " + year.value + '-' + month.value + 
+        /* output.value += "KST: " + year.value + '-' + month.value + 
           '-' + day.value + ' ' + hour.value + ':' + minute.value + 
-          ':' + second.value + "\n";
+          ':' + second.value + "\n"; */
         /* test KST format */
         try {
           let testKST = pyodide.runPython(`
               import js
               import datetime
+              import pytz
+              import calendar
+              import time
+              # put together date and time from input strings #
               kst = (js.year.value + '-' + js.month.value + '-' + 
                 js.day.value + ' ' + js.hour.value + ':' + 
                 js.minute.value + ':' + js.second.value)
               try: 
-                kstm = datetime.datetime.strptime(kst,'%Y-%m-%d %H:%M:%S')
+                # create datetime from combined string # 
+                kstDt = datetime.datetime.strptime(kst,'%Y-%m-%d %H:%M:%S')
+                # set timezone name #
+                kstName = 'Asia/Seoul'
+                # set timezone #
+                kstTz = pytz.timezone(kstName)
+                # localize time to timezone #
+                kstTzDt = kstTz.localize(kstDt, is_dst=None) 
+                # convert KST to UTC #
+                utcTime = (kstTzDt.astimezone(pytz.utc)
+                  .strftime('%Y-%m-%d %H:%M:%S'))
+                # convert UTC to Epoch #
+                epochTime = calendar.timegm(time.strptime(utcTime, '%Y-%m-%d %H:%M:%S'))
+                result = ''
               except (AttributeError, ValueError): 
-                kstm = 'invalid date'
+                result = 'invalid date'
             `);
-          output.value += pyodide.globals.get('kst') + "\n";
-          output.value += pyodide.globals.get('kstm') + "\n";
+          output.value += "KST " + pyodide.globals.get("kst") + "\n";
+          /* print result: valid date or message */
+          if (pyodide.globals.get("result") == "") {
+            output.value += "Epoch " + pyodide.globals.get("epochTime") + "\n";
+          } else {
+            output.value += pyodide.globals.get("result") + "\n";
+          }
         } catch (error) {
           output.value += error + "\n";
         } 
