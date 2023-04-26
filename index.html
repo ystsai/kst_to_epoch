@@ -46,9 +46,8 @@
           <input type="text" class="form-control" placeholder="SS" aria-label="Second" id="second">
         </div>
       </div>
-      <button class="btn btn-primary" id="submit" onclick="main()">Submit KST
+      <button class="btn btn-primary" id="submit" onclick="calcEpoch()">Submit KST
       </button>
-      <button class="btn btn-primary" type="reset">Reset</button>
     </div>
     <!-- text box for output -->
     <div class="container-fluid px-4 py-4">
@@ -63,22 +62,34 @@
       const hour = document.getElementById("hour");
       const minute = document.getElementById("minute");
       const second = document.getElementById("second");
-      output.value = ""
-      const kst = (year.value + '-' + month.value + '-' + day.value + 
-        ' ' + hour.value + ':' + minute.value + ':' + second.value)
+      output.value = "Loading...\n"
       async function main() {
         let pyodide = await loadPyodide();
-        output.value += "KST " + kst + "\n";
+        output.value += "Ready to calculate!\n"
+        return pyodide;
+      }
+
+      let pyodideReady = main();
+
+      async function calcEpoch() {
+        let pyodide = await pyodideReady;
+        output.value += "KST: " + year.value + '-' + month.value + 
+          '-' + day.value + ' ' + hour.value + ':' + minute.value + 
+          ':' + second.value + "\n";
         /* test KST format */
         try {
           let testKST = pyodide.runPython(`
               import js
               import datetime
+              kst = (js.year.value + '-' + js.month.value + '-' + 
+                js.day.value + ' ' + js.hour.value + ':' + 
+                js.minute.value + ':' + js.second.value)
               try: 
-                kstm = datetime.datetime.strptime(js.kst,'%Y-%m-%d %H:%M:%S')
+                kstm = datetime.datetime.strptime(kst,'%Y-%m-%d %H:%M:%S')
               except (AttributeError, ValueError): 
                 kstm = 'invalid date'
             `);
+          output.value += pyodide.globals.get('kst') + "\n";
           output.value += pyodide.globals.get('kstm') + "\n";
         } catch (error) {
           output.value += error + "\n";
