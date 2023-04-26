@@ -48,6 +48,7 @@
       </div>
       <button class="btn btn-primary" id="submit" onclick="main()">Submit KST
       </button>
+      <button class="btn btn-primary" type="reset">Reset</button>
     </div>
     <!-- text box for output -->
     <div class="container-fluid px-4 py-4">
@@ -66,7 +67,22 @@
       const kst = (year.value + '-' + month.value + '-' + day.value + 
         ' ' + hour.value + ':' + minute.value + ':' + second.value)
       async function main() {
-        output.value += "KST " + kst + "\n"
+        let pyodide = await loadPyodide();
+        output.value += "KST " + kst + "\n";
+        /* test KST format */
+        try {
+          let testKST = pyodide.runPython(`
+              import js
+              import datetime
+              try: 
+                kstm = datetime.datetime.strptime(js.kst,'%Y-%m-%d %H:%M:%S')
+              except (AttributeError, ValueError): 
+                kstm = 'invalid date'
+            `);
+          output.value += pyodide.globals.get('kstm') + "\n";
+        } catch (error) {
+          output.value += error + "\n";
+        } 
       }
     </script>  
   </body>
